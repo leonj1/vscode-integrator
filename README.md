@@ -108,6 +108,47 @@ node dist/index.js generate --path ./my-project --validate
 node dist/index.js generate --force
 ```
 
+### Test DevContainer (CLI-only)
+
+Test the devcontainer setup using the bundled devcontainer CLI:
+
+```bash
+node dist/index.js test-devcontainer [options]
+```
+
+Options:
+- `-p, --path <path>` - Project path (defaults to current directory)
+- `--build-only` - Only build the container without running tests
+- `--no-cache` - Build without using cache
+- `--exec <command>` - Execute a specific command in the container
+- `--test-command <command>` - Custom test command (default: npm test)
+
+Examples:
+```bash
+# Test devcontainer in current directory
+node dist/index.js test-devcontainer
+
+# Build only without running tests
+node dist/index.js test-devcontainer --build-only
+
+# Execute a custom command in the container
+node dist/index.js test-devcontainer --exec "node --version"
+
+# Run with custom test command
+node dist/index.js test-devcontainer --test-command "npm run test:coverage"
+
+# Build without cache
+node dist/index.js test-devcontainer --no-cache
+```
+
+This command uses the bundled `@devcontainers/cli` to:
+1. Build the devcontainer image
+2. Start the container
+3. Run tests or execute commands inside the container
+4. Report results
+
+No additional tools or VS Code installation required!
+
 ## Generated Files
 
 ### DevContainer Configuration

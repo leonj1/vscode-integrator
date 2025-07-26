@@ -81,6 +81,7 @@ export class LaunchConfigGenerator {
         name: 'Launch via NPM',
         runtimeExecutable: 'npm',
         runtimeArgs: ['run-script', 'start'],
+        program: '${workspaceFolder}/package.json',
         skipFiles: ['<node_internals>/**'],
         cwd: '${workspaceFolder}'
       },
@@ -90,6 +91,7 @@ export class LaunchConfigGenerator {
         name: 'Debug Tests',
         runtimeExecutable: 'npm',
         runtimeArgs: ['run-script', 'test'],
+        program: '${workspaceFolder}/package.json',
         skipFiles: ['<node_internals>/**'],
         cwd: '${workspaceFolder}',
         env: {

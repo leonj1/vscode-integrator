@@ -43,6 +43,7 @@
     "outputPath": "binaries"
   },
   "dependencies": {
+    "@devcontainers/cli": "^0.80.0",
     "commander": "^11.0.0",
     "glob": "^10.3.0"
   },

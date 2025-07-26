@@ -12,6 +12,7 @@ import { TasksConfigGenerator } from './services/vscode/TasksConfigGenerator';
 import { SettingsConfigGenerator } from './services/vscode/SettingsConfigGenerator';
 import { DevContainerValidator } from './services/DevContainerValidator';
 import { VSCodeIntegrationValidator } from './services/VSCodeIntegrationValidator';
+import { DevContainerCLIService } from './services/DevContainerCLIService';
 
 interface Options {
   path?: string;
@@ -98,6 +99,118 @@ program
       
     } catch (error) {
       console.error('❌ Error:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('test-devcontainer')
+  .description('Test the devcontainer setup using the bundled devcontainer CLI')
+  .option('-p, --path <path>', 'Project path (defaults to current directory)')
+  .option('--build-only', 'Only build the container without running tests')
+  .option('--no-cache', 'Build without using cache')
+  .option('--exec <command>', 'Execute a specific command in the container')
+  .option('--test-command <command>', 'Custom test command (default: npm test)')
+  .action(async (options: { 
+    path?: string; 
+    buildOnly?: boolean;
+    cache?: boolean;
+    exec?: string;
+    testCommand?: string;
+  }) => {
+    try {
+      const projectPath = path.resolve(options.path || process.cwd());
+      
+      console.log(`🐳 Testing DevContainer at: ${projectPath}`);
+      
+      const cliService = new DevContainerCLIService(projectPath);
+      
+      // Check if devcontainer CLI is available
+      const isAvailable = await cliService.isAvailable();
+      if (!isAvailable) {
+        console.error('❌ DevContainer CLI is not available in the binary.');
+        console.error('   This might be due to missing dependencies during build.');
+        process.exit(1);
+      }
+      
+      // Get version
+      const version = await cliService.getVersion();
+      if (version) {
+        console.log(`📦 Using DevContainer CLI version: ${version}`);
+      }
+      
+      // Build the container
+      console.log('\n🔨 Building DevContainer...');
+      const buildResult = await cliService.build({ 
+        noCache: options.cache === false 
+      });
+      
+      if (!buildResult.success) {
+        console.error('❌ Build failed:', buildResult.error);
+        console.error('\nBuild output:', buildResult.output);
+        process.exit(1);
+      }
+      
+      console.log('✅ DevContainer built successfully');
+      
+      if (options.buildOnly) {
+        console.log('\n✨ Build-only mode: Skipping container startup and tests');
+        process.exit(0);
+      }
+      
+      // Start the container
+      console.log('\n🚀 Starting DevContainer...');
+      const upResult = await cliService.up();
+      
+      if (!upResult.success) {
+        console.error('❌ Failed to start container:', upResult.error);
+        process.exit(1);
+      }
+      
+      console.log('✅ DevContainer started successfully');
+      
+      // Execute custom command or run tests
+      if (options.exec) {
+        console.log(`\n💻 Executing command: ${options.exec}`);
+        const execResult = await cliService.exec(options.exec.split(' '));
+        
+        if (execResult.stdout) {
+          console.log('\nOutput:', execResult.stdout);
+        }
+        
+        if (execResult.stderr) {
+          console.error('\nError output:', execResult.stderr);
+        }
+        
+        process.exit(execResult.exitCode);
+      } else {
+        // Run tests
+        const testCommand = options.testCommand 
+          ? options.testCommand.split(' ')
+          : ['npm', 'test'];
+          
+        console.log(`\n🧪 Running tests: ${testCommand.join(' ')}`);
+        const testResult = await cliService.exec(testCommand);
+        
+        if (testResult.stdout) {
+          console.log('\nTest output:\n', testResult.stdout);
+        }
+        
+        if (testResult.stderr) {
+          console.error('\nTest errors:\n', testResult.stderr);
+        }
+        
+        if (testResult.success) {
+          console.log('\n✅ All tests passed!');
+        } else {
+          console.error('\n❌ Tests failed');
+        }
+        
+        process.exit(testResult.exitCode);
+      }
+      
+    } catch (error) {
+      console.error('❌ Unexpected error:', error);
       process.exit(1);
     }
   });

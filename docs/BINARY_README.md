@@ -55,6 +55,20 @@ Options:
   --validate               Validate the generated configurations
 ```
 
+### Test DevContainer (CLI-only)
+```bash
+./vscode-integrator-linux test-devcontainer [options]
+
+Options:
+  -p, --path <path>         Project path (defaults to current directory)
+  --build-only              Only build the container without running tests
+  --no-cache                Build without using cache
+  --exec <command>          Execute a specific command in the container
+  --test-command <command>  Custom test command (default: npm test)
+```
+
+This command includes a bundled version of the official DevContainer CLI, allowing you to test your devcontainer setup without installing any additional tools!
+
 ## System Requirements
 
 - No Node.js installation required

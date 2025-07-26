@@ -113,9 +113,18 @@ export class ComplexDevContainerGenerator extends DevContainerGenerator {
     
     lines.push(...content.instructions);
     
-    lines.push('');
-    lines.push('# Switch to non-root user');
-    lines.push('USER vscode');
+    // Only add user creation for non-devcontainer base images
+    if (!content.baseImage.includes('devcontainers')) {
+      lines.push('');
+      lines.push('# Create non-root user');
+      lines.push('RUN groupadd --gid 1000 vscode \\');
+      lines.push('    && useradd --uid 1000 --gid vscode --shell /bin/bash --create-home vscode \\');
+      lines.push('    && mkdir -p /home/vscode/.vscode-server /home/vscode/.vscode-server-insiders \\');
+      lines.push('    && chown -R vscode:vscode /home/vscode /workspace');
+      lines.push('');
+      lines.push('# Switch to non-root user');
+      lines.push('USER vscode');
+    }
     
     return lines.join('\n');
   }

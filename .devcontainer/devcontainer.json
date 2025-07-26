@@ -1,0 +1,48 @@
+{
+  "name": "Node.js Development Container (Custom)",
+  "dockerFile": "Dockerfile",
+  "context": "..",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "christian-kohler.npm-intellisense",
+        "eg2.vscode-npm-script",
+        "ms-vscode.js-debug",
+        "eamodio.gitlens",
+        "ms-vsliveshare.vsliveshare",
+        "streetsidesoftware.code-spell-checker"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "eslint.validate": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact"
+        ]
+      }
+    }
+  },
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=${localWorkspaceFolder}/,target=/workspace,type=bind,consistency=cached",
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "forwardPorts": [
+    3000,
+    3001,
+    8080,
+    9229
+  ],
+  "containerEnv": {
+    "NODE_ENV": "development"
+  },
+  "runArgs": [
+    "--cap-add=SYS_PTRACE",
+    "--security-opt",
+    "seccomp=unconfined"
+  ]
+}

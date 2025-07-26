@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+.git
+.vscode
+.devcontainer
+*.log
+.DS_Store
+test-project/.devcontainer
+test-project/.vscode

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Automated DevContainer and VS Code configuration generator",
   "main": "dist/index.js",
+  "bin": {
+    "vscode-integrator": "./dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -11,11 +14,34 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint src/**/*.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:binary": "npm run build && pkg .",
+    "build:binary:linux": "npm run build && pkg . --targets node18-linux-x64 --output binaries/vscode-integrator-linux",
+    "build:binary:macos": "npm run build && pkg . --targets node18-macos-x64 --output binaries/vscode-integrator-macos",
+    "build:binary:macos-arm": "npm run build && pkg . --targets node18-macos-arm64 --output binaries/vscode-integrator-macos-arm",
+    "build:binary:windows": "npm run build && pkg . --targets node18-win-x64 --output binaries/vscode-integrator-win.exe",
+    "build:binary:all": "npm run build:binary:linux && npm run build:binary:macos && npm run build:binary:macos-arm && npm run build:binary:windows"
   },
-  "keywords": ["devcontainer", "vscode", "automation"],
+  "keywords": [
+    "devcontainer",
+    "vscode",
+    "automation"
+  ],
   "author": "",
   "license": "MIT",
+  "pkg": {
+    "scripts": "dist/**/*.js",
+    "assets": [
+      "dist/**/*"
+    ],
+    "targets": [
+      "node18-linux-x64",
+      "node18-macos-x64",
+      "node18-macos-arm64",
+      "node18-win-x64"
+    ],
+    "outputPath": "binaries"
+  },
   "dependencies": {
     "commander": "^11.0.0",
     "glob": "^10.3.0"
@@ -28,6 +54,7 @@
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.45.0",
     "jest": "^29.5.0",
+    "pkg": "^5.8.1",
     "ts-jest": "^29.1.0",
     "typescript": "^5.1.6"
   }

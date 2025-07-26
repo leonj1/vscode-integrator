@@ -8,3 +8,4 @@ coverage
 .DS_Store
 test-project/.devcontainer
 test-project/.vscode
+binaries

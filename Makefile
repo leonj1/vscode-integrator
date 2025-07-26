@@ -48,15 +48,50 @@ typecheck: ## Run type checking in Docker container
 	@$(DOCKER_RUN) $(IMAGE_NAME) npm run typecheck
 
 .PHONY: build
-build: ## Build the project in Docker container
-	@echo "Building test Docker image..."
-	@docker build -f Dockerfile.test -t $(IMAGE_NAME) .
-	@echo "Building project..."
-	@$(DOCKER_RUN) $(IMAGE_NAME) npm run build
+build: ## Build TypeScript to JavaScript
+	@echo "Building TypeScript project..."
+	@npm run build
+
+.PHONY: build-binary
+build-binary: ## Build executable binaries for all platforms
+	@echo "Building executable binaries..."
+	@mkdir -p binaries
+	@npm run build:binary:all
+	@echo "Binaries created in ./binaries/"
+	@ls -la binaries/
+
+.PHONY: build-binary-linux
+build-binary-linux: ## Build Linux executable
+	@echo "Building Linux binary..."
+	@mkdir -p binaries
+	@npm run build:binary:linux
+	@echo "Linux binary created: binaries/vscode-integrator-linux"
+
+.PHONY: build-binary-macos
+build-binary-macos: ## Build macOS executable
+	@echo "Building macOS binary..."
+	@mkdir -p binaries
+	@npm run build:binary:macos
+	@echo "macOS binary created: binaries/vscode-integrator-macos"
+
+.PHONY: build-binary-windows
+build-binary-windows: ## Build Windows executable
+	@echo "Building Windows binary..."
+	@mkdir -p binaries
+	@npm run build:binary:windows
+	@echo "Windows binary created: binaries/vscode-integrator-win.exe"
+
+.PHONY: build-docker
+build-docker: ## Build binaries using Docker (for cross-platform builds)
+	@echo "Building binaries in Docker..."
+	@docker build -f Dockerfile.build -t vscode-integrator-builder .
+	@docker run --rm -v $(PWD)/binaries:/app/binaries vscode-integrator-builder
+	@echo "Binaries created in ./binaries/"
 
 .PHONY: clean
 clean: ## Clean up generated files and Docker images
 	@echo "Cleaning up..."
-	@rm -rf dist coverage node_modules
+	@rm -rf dist coverage node_modules binaries
 	@docker rmi $(IMAGE_NAME) 2>/dev/null || true
+	@docker rmi vscode-integrator-builder 2>/dev/null || true
 	@echo "Clean complete"

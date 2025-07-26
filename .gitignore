@@ -44,3 +44,6 @@ temp/
 
 # Package files
 *.tgz
+
+# Binary executables
+binaries/

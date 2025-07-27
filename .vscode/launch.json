@@ -29,11 +29,15 @@
       "cwd": "${workspaceFolder}"
     },
     {
-      "type": "pwa-node",
+      "type": "node",
       "request": "launch",
       "name": "Debug Tests",
-      "program": "${workspaceFolder}/node_modules/.bin/jest",
-      "args": ["--runInBand"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run-script",
+        "test"
+      ],
+      "program": "${workspaceFolder}/package.json",
       "skipFiles": [
         "<node_internals>/**"
       ],

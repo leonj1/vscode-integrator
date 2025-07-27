@@ -4,7 +4,7 @@ import * as fs from 'fs/promises';
 
 describe('ComplexDevContainerGenerator', () => {
   const testProjectPath = '/test/project';
-  
+
   describe('constructor', () => {
     it('should initialize with project type and path', () => {
       const generator = new ComplexDevContainerGenerator('Node.js', testProjectPath);
@@ -25,7 +25,7 @@ describe('ComplexDevContainerGenerator', () => {
 
       expect(config.name).toBe('Node.js Development Container (Custom)');
       expect(config.dockerFile).toBe('Dockerfile');
-      expect(config.context).toBe('..');
+      expect(config.context).toBe('.');
       expect(config.remoteUser).toBe('vscode');
       expect(config.forwardPorts).toEqual([3000, 3001, 8080, 9229]);
       expect(config.containerEnv).toEqual({ NODE_ENV: 'development' });

@@ -20,7 +20,7 @@ export class ComplexDevContainerGenerator extends DevContainerGenerator {
     const config: DevContainerConfig = {
       name: `${this.projectType} Development Container (Custom)`,
       dockerFile: 'Dockerfile',
-      context: '..',
+      context: '.',
       customizations: {
         vscode: {
           extensions: allExtensions,

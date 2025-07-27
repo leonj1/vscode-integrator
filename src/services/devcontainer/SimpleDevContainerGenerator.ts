@@ -1,6 +1,12 @@
 import { DevContainerGenerator, DevContainerConfig } from './DevContainerGenerator';
 
 export class SimpleDevContainerGenerator extends DevContainerGenerator {
+  async generateDockerfile(): Promise<string> {
+    // SimpleDevContainerGenerator uses pre-built images with features
+    // No custom Dockerfile is needed
+    return '';
+  }
+
   async generateConfig(): Promise<DevContainerConfig> {
     const baseImage = this.getBaseImage(this.projectType);
     const languageExtensions = this.getLanguageExtensions(this.projectType);

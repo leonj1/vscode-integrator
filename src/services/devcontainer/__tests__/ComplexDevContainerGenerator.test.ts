@@ -233,5 +233,19 @@ describe('ComplexDevContainerGenerator', () => {
       const lastNonEmptyLine = lines.filter(l => l.trim()).pop();
       expect(lastNonEmptyLine).toBe('USER vscode');
     });
+
+    it('should create vscode user with proper permissions', async () => {
+      const generator = new ComplexDevContainerGenerator('Node.js', testProjectPath);
+      const dockerfile = await generator.generateDockerfile();
+
+      // Check that the vscode user creation commands are present
+      expect(dockerfile).toContain('# Create non-root user (safe to run even if user exists)');
+      expect(dockerfile).toContain('RUN groupadd --gid 1000 vscode 2>/dev/null || true \\');
+      expect(dockerfile).toContain('    && useradd --uid 1000 --gid vscode --shell /bin/bash --create-home vscode 2>/dev/null || true \\');
+      expect(dockerfile).toContain('    && mkdir -p /home/vscode/.vscode-server /home/vscode/.vscode-server-insiders \\');
+      expect(dockerfile).toContain('    && chown -R vscode:vscode /home/vscode /workspace 2>/dev/null || true');
+      expect(dockerfile).toContain('# Switch to non-root user');
+      expect(dockerfile).toContain('USER vscode');
+    });
   });
 });

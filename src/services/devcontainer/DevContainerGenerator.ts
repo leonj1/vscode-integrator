@@ -33,6 +33,7 @@ export abstract class DevContainerGenerator {
   }
 
   abstract generateConfig(): Promise<DevContainerConfig>;
+  abstract generateDockerfile(): Promise<string>;
 
   protected getCommonExtensions(): string[] {
     return [

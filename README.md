@@ -58,96 +58,21 @@ npm link
 
 ## Usage
 
-### Analyze a Project
+### How to run this
 
-Analyze a project without generating any configurations:
-
-```bash
-node dist/index.js analyze [--path <project-path>]
-```
-
-Example output:
-```
-📊 Project Analysis for: /path/to/project
-
-🏷️  Project Type: Node.js
-
-📝 Languages Detected:
-   - TypeScript: 45 files
-   - JavaScript: 12 files
-
-📏 Total Lines of Code: 3,245
-
-🔗 Git Repository: Yes
-```
-
-### Generate Configurations
-
-Generate both DevContainer and VS Code configurations:
+Generate DevContainer and VS Code configurations with validation:
 
 ```bash
-node dist/index.js generate [options]
+./binaries/vscode-integrator-linux generate --validate
 ```
 
-Options:
-- `-p, --path <path>` - Project path (defaults to current directory)
-- `-f, --force` - Overwrite existing configurations
-- `--devcontainer-only` - Generate only DevContainer configuration
-- `--vscode-only` - Generate only VS Code configuration
-- `--validate` - Validate the generated configurations
+### Optional force
 
-Example:
-```bash
-# Generate configurations for current directory
-node dist/index.js generate
-
-# Generate for a specific project with validation
-node dist/index.js generate --path ./my-project --validate
-
-# Force overwrite existing configurations
-node dist/index.js generate --force
-```
-
-### Test DevContainer (CLI-only)
-
-Test the devcontainer setup using the bundled devcontainer CLI:
+Force overwrite existing configurations:
 
 ```bash
-node dist/index.js test-devcontainer [options]
+./binaries/vscode-integrator-linux generate --validate --force
 ```
-
-Options:
-- `-p, --path <path>` - Project path (defaults to current directory)
-- `--build-only` - Only build the container without running tests
-- `--no-cache` - Build without using cache
-- `--exec <command>` - Execute a specific command in the container
-- `--test-command <command>` - Custom test command (default: npm test)
-
-Examples:
-```bash
-# Test devcontainer in current directory
-node dist/index.js test-devcontainer
-
-# Build only without running tests
-node dist/index.js test-devcontainer --build-only
-
-# Execute a custom command in the container
-node dist/index.js test-devcontainer --exec "node --version"
-
-# Run with custom test command
-node dist/index.js test-devcontainer --test-command "npm run test:coverage"
-
-# Build without cache
-node dist/index.js test-devcontainer --no-cache
-```
-
-This command uses the bundled `@devcontainers/cli` to:
-1. Build the devcontainer image
-2. Start the container
-3. Run tests or execute commands inside the container
-4. Report results
-
-No additional tools or VS Code installation required!
 
 ## Generated Files
 
@@ -211,20 +136,13 @@ The project is organized into modular components:
 ### Building
 
 ```bash
-npm run build
+make build
 ```
 
 ### Running Tests
 
 ```bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run tests with coverage
-npm run test:coverage
+make test
 ```
 
 ### Linting

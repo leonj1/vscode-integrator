@@ -1,7 +1,7 @@
 {
   "name": "Node.js Development Container (Custom)",
   "dockerFile": "Dockerfile",
-  "context": "..",
+  "context": ".",
   "customizations": {
     "vscode": {
       "extensions": [

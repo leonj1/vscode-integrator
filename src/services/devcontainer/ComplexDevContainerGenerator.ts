@@ -113,13 +113,24 @@ export class ComplexDevContainerGenerator extends DevContainerGenerator {
 
     lines.push(...content.instructions);
 
-    // Always ensure vscode user exists (safe to run even if user already exists)
+    // Always ensure vscode user exists (handle existing node user with UID 1000)
     lines.push('');
-    lines.push('# Create non-root user (safe to run even if user exists)');
-    lines.push('RUN groupadd --gid 1000 vscode 2>/dev/null || true \\');
-    lines.push('    && useradd --uid 1000 --gid vscode --shell /bin/bash --create-home vscode 2>/dev/null || true \\');
-    lines.push('    && mkdir -p /home/vscode/.vscode-server /home/vscode/.vscode-server-insiders \\');
-    lines.push('    && chown -R vscode:vscode /home/vscode /workspace 2>/dev/null || true');
+    lines.push('# Create non-root user (handle existing node user with UID 1000)');
+    lines.push('RUN groupadd --gid 1001 vscode 2>/dev/null || true \\');
+    lines.push('    && useradd --uid 1001 --gid vscode --shell /bin/bash --create-home vscode 2>/dev/null || true \\');
+    lines.push('    && mkdir -p /home/vscode/.vscode-server /home/vscode/.vscode-server-insiders');
+    lines.push('');
+    lines.push('# Ensure vscode user owns the workspace and can write to it');
+    lines.push('RUN chown -R vscode:vscode /home/vscode \\');
+    lines.push('    && chown -R vscode:vscode /workspace \\');
+    lines.push('    && chmod -R 755 /workspace \\');
+    lines.push('    && mkdir -p /workspace/dist/__tests__/services/devcontainer \\');
+    lines.push('    && mkdir -p /workspace/dist/services/devcontainer/__tests__ \\');
+    lines.push('    && mkdir -p /workspace/dist/services/vscode/__tests__ \\');
+    lines.push('    && mkdir -p /workspace/dist/types \\');
+    lines.push('    && mkdir -p /workspace/dist/utils \\');
+    lines.push('    && chown -R vscode:vscode /workspace/dist \\');
+    lines.push('    && chmod -R 755 /workspace/dist');
     lines.push('');
     lines.push('# Switch to non-root user');
     lines.push('USER vscode');

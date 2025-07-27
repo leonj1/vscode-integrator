@@ -239,11 +239,14 @@ describe('ComplexDevContainerGenerator', () => {
       const dockerfile = await generator.generateDockerfile();
 
       // Check that the vscode user creation commands are present
-      expect(dockerfile).toContain('# Create non-root user (safe to run even if user exists)');
-      expect(dockerfile).toContain('RUN groupadd --gid 1000 vscode 2>/dev/null || true \\');
-      expect(dockerfile).toContain('    && useradd --uid 1000 --gid vscode --shell /bin/bash --create-home vscode 2>/dev/null || true \\');
-      expect(dockerfile).toContain('    && mkdir -p /home/vscode/.vscode-server /home/vscode/.vscode-server-insiders \\');
-      expect(dockerfile).toContain('    && chown -R vscode:vscode /home/vscode /workspace 2>/dev/null || true');
+      expect(dockerfile).toContain('# Create non-root user (handle existing node user with UID 1000)');
+      expect(dockerfile).toContain('RUN groupadd --gid 1001 vscode 2>/dev/null || true \\');
+      expect(dockerfile).toContain('    && useradd --uid 1001 --gid vscode --shell /bin/bash --create-home vscode 2>/dev/null || true \\');
+      expect(dockerfile).toContain('    && mkdir -p /home/vscode/.vscode-server /home/vscode/.vscode-server-insiders');
+      expect(dockerfile).toContain('# Ensure vscode user owns the workspace and can write to it');
+      expect(dockerfile).toContain('RUN chown -R vscode:vscode /home/vscode \\');
+      expect(dockerfile).toContain('    && chown -R vscode:vscode /workspace \\');
+      expect(dockerfile).toContain('    && chmod -R 755 /workspace \\');
       expect(dockerfile).toContain('# Switch to non-root user');
       expect(dockerfile).toContain('USER vscode');
     });

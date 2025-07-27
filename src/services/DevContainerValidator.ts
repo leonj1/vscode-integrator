@@ -42,7 +42,7 @@ export class DevContainerValidator {
 
       // Read devcontainer configuration
       const config = await this.readDevContainerConfig();
-      
+
       // Determine Dockerfile path
       let dockerfilePath: string;
       let buildContext: string = this.projectPath;
@@ -80,7 +80,7 @@ export class DevContainerValidator {
       );
 
       buildLog.push(...result.stdout.split('\n').filter(line => line.trim()));
-      
+
       if (!result.success) {
         errors.push(...result.stderr.split('\n').filter(line => line.trim()));
         throw new Error(`Docker build failed: ${result.stderr}`);
@@ -102,7 +102,7 @@ export class DevContainerValidator {
       };
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       return {
         success: false,
         buildLog,
@@ -130,7 +130,7 @@ export class DevContainerValidator {
 
       // Determine compilation command based on project type
       const compilationCommand = await this.determineCompilationCommand();
-      
+
       output.push(`Running compilation command: ${compilationCommand.join(' ')}`);
 
       // Run compilation in container
@@ -140,6 +140,7 @@ export class DevContainerValidator {
         {
           workdir: '/workspace',
           volumes: [`${this.projectPath}:/workspace`],
+          user: 'vscode',
         }
       );
 
@@ -170,7 +171,7 @@ export class DevContainerValidator {
       };
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       return {
         success: false,
         output,
@@ -197,7 +198,7 @@ export class DevContainerValidator {
 
       // Determine test command based on project type
       const testCommand = await this.determineTestCommand();
-      
+
       testOutput.push(`Running test command: ${testCommand.join(' ')}`);
 
       // Run tests in container
@@ -238,7 +239,7 @@ export class DevContainerValidator {
       };
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       return {
         success: false,
         totalTests: 0,
@@ -585,15 +586,17 @@ export class DevContainerValidator {
     // Check for various project types and their build commands
     if (await FileUtils.fileExists(path.join(this.projectPath, 'package.json'))) {
       const packageJson = await FileUtils.readJsonFile(path.join(this.projectPath, 'package.json'));
+
+      // For TypeScript projects, always use --noEmit to avoid permission issues
+      if (packageJson.devDependencies?.typescript || packageJson.dependencies?.typescript) {
+        return ['npx', 'tsc', '--noEmit', '--skipLibCheck'];
+      }
+
       if (packageJson.scripts?.build) {
         return ['npm', 'run', 'build'];
       }
       if (packageJson.scripts?.compile) {
         return ['npm', 'run', 'compile'];
-      }
-      // TypeScript project
-      if (packageJson.devDependencies?.typescript || packageJson.dependencies?.typescript) {
-        return ['npx', 'tsc'];
       }
     }
 

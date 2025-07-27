@@ -104,67 +104,65 @@ export class ComplexDevContainerGenerator extends DevContainerGenerator {
 
   private buildDockerfile(content: DockerfileContent): string {
     const lines: string[] = [];
-    
+
     lines.push(`FROM ${content.baseImage}`);
     lines.push('');
     lines.push('# Set environment variables');
     lines.push('ENV DEBIAN_FRONTEND=noninteractive');
     lines.push('');
-    
+
     lines.push(...content.instructions);
-    
-    // Only add user creation for non-devcontainer base images
-    if (!content.baseImage.includes('devcontainers')) {
-      lines.push('');
-      lines.push('# Create non-root user');
-      lines.push('RUN groupadd --gid 1000 vscode \\');
-      lines.push('    && useradd --uid 1000 --gid vscode --shell /bin/bash --create-home vscode \\');
-      lines.push('    && mkdir -p /home/vscode/.vscode-server /home/vscode/.vscode-server-insiders \\');
-      lines.push('    && chown -R vscode:vscode /home/vscode /workspace');
-      lines.push('');
-      lines.push('# Switch to non-root user');
-      lines.push('USER vscode');
-    }
-    
+
+    // Always ensure vscode user exists (safe to run even if user already exists)
+    lines.push('');
+    lines.push('# Create non-root user (safe to run even if user exists)');
+    lines.push('RUN groupadd --gid 1000 vscode 2>/dev/null || true \\');
+    lines.push('    && useradd --uid 1000 --gid vscode --shell /bin/bash --create-home vscode 2>/dev/null || true \\');
+    lines.push('    && mkdir -p /home/vscode/.vscode-server /home/vscode/.vscode-server-insiders \\');
+    lines.push('    && chown -R vscode:vscode /home/vscode /workspace 2>/dev/null || true');
+    lines.push('');
+    lines.push('# Switch to non-root user');
+    lines.push('USER vscode');
+
     return lines.join('\n');
   }
 
   private getNodeDockerInstructions(): string[] {
     const instructions: string[] = [];
-    
+
     instructions.push('# Install Node.js build tools');
     instructions.push('RUN apt-get update && apt-get install -y python3 make g++');
-    
+
     if (this.dependencies.dependencies || this.dependencies.devDependencies) {
       instructions.push('');
       instructions.push('# Install global npm packages');
       instructions.push('RUN npm install -g npm@latest');
-      
+
       // Check for common build tools in dependencies
       const allDeps = { ...this.dependencies.dependencies, ...this.dependencies.devDependencies };
       if (allDeps['node-gyp'] || allDeps['node-sass'] || allDeps['bcrypt']) {
         instructions.push('RUN npm install -g node-gyp');
       }
-      
+
       if (allDeps['typescript']) {
         instructions.push('RUN npm install -g typescript');
       }
-      
+
       if (allDeps['@angular/cli']) {
         instructions.push('RUN npm install -g @angular/cli');
       }
-      
+
       if (allDeps['react-scripts']) {
         instructions.push('RUN npm install -g create-react-app');
       }
     }
-    
+
     return instructions;
   }
 
   private getPythonDockerInstructions(): string[] {
     const instructions: string[] = [];
-    
+
     instructions.push('# Install Python development dependencies');
     instructions.push('RUN apt-get update && apt-get install -y \\');
     instructions.push('    python3-dev \\');
@@ -172,41 +170,41 @@ export class ComplexDevContainerGenerator extends DevContainerGenerator {
     instructions.push('    python3-venv \\');
     instructions.push('    libpq-dev \\');
     instructions.push('    libmysqlclient-dev');
-    
+
     instructions.push('');
     instructions.push('# Upgrade pip');
     instructions.push('RUN pip3 install --upgrade pip setuptools wheel');
-    
+
     if (this.dependencies.dependencies) {
       // Check for common Python packages that need system dependencies
-      if (this.dependencies.dependencies.includes('numpy') || 
+      if (this.dependencies.dependencies.includes('numpy') ||
           this.dependencies.dependencies.includes('pandas') ||
           this.dependencies.dependencies.includes('scipy')) {
         instructions.push('RUN apt-get update && apt-get install -y libatlas-base-dev gfortran');
       }
-      
+
       if (this.dependencies.dependencies.includes('pillow')) {
         instructions.push('RUN apt-get update && apt-get install -y libjpeg-dev libpng-dev');
       }
     }
-    
+
     return instructions;
   }
 
   private getGoDockerInstructions(): string[] {
     const instructions: string[] = [];
-    
+
     instructions.push('# Install Go tools');
     instructions.push('RUN go install golang.org/x/tools/gopls@latest');
     instructions.push('RUN go install github.com/go-delve/delve/cmd/dlv@latest');
     instructions.push('RUN go install honnef.co/go/tools/cmd/staticcheck@latest');
-    
+
     return instructions;
   }
 
   private getJavaDockerInstructions(): string[] {
     const instructions: string[] = [];
-    
+
     if (this.projectType.includes('Maven')) {
       instructions.push('# Ensure Maven is installed');
       instructions.push('RUN apt-get update && apt-get install -y maven');
@@ -217,23 +215,23 @@ export class ComplexDevContainerGenerator extends DevContainerGenerator {
       instructions.push('ENV GRADLE_HOME=/opt/gradle/gradle-8.2');
       instructions.push('ENV PATH=${GRADLE_HOME}/bin:${PATH}');
     }
-    
+
     return instructions;
   }
 
   private getRustDockerInstructions(): string[] {
     const instructions: string[] = [];
-    
+
     instructions.push('# Install Rust tools');
     instructions.push('RUN rustup component add rustfmt clippy rust-analysis rust-src');
     instructions.push('RUN cargo install cargo-watch cargo-edit');
-    
+
     return instructions;
   }
 
   private getRubyDockerInstructions(): string[] {
     const instructions: string[] = [];
-    
+
     instructions.push('# Install Ruby development dependencies');
     instructions.push('RUN apt-get update && apt-get install -y \\');
     instructions.push('    libssl-dev \\');
@@ -244,17 +242,17 @@ export class ComplexDevContainerGenerator extends DevContainerGenerator {
     instructions.push('    libxslt1-dev \\');
     instructions.push('    libcurl4-openssl-dev \\');
     instructions.push('    libffi-dev');
-    
+
     instructions.push('');
     instructions.push('# Install bundler');
     instructions.push('RUN gem install bundler');
-    
+
     return instructions;
   }
 
   private getPhpDockerInstructions(): string[] {
     const instructions: string[] = [];
-    
+
     instructions.push('# Install PHP extensions');
     instructions.push('RUN apt-get update && apt-get install -y \\');
     instructions.push('    libzip-dev \\');
@@ -262,17 +260,17 @@ export class ComplexDevContainerGenerator extends DevContainerGenerator {
     instructions.push('    libxml2-dev');
     instructions.push('');
     instructions.push('RUN docker-php-ext-install pdo_mysql mysqli zip');
-    
+
     instructions.push('');
     instructions.push('# Install Composer');
     instructions.push('COPY --from=composer:latest /usr/bin/composer /usr/bin/composer');
-    
+
     return instructions;
   }
 
   private getInstallDependenciesInstructions(): string[] {
     const instructions: string[] = [];
-    
+
     switch (this.projectType) {
       case 'Node.js':
       case 'TypeScript':
@@ -300,7 +298,7 @@ export class ComplexDevContainerGenerator extends DevContainerGenerator {
         instructions.push('RUN composer install || echo "No composer.json found"');
         break;
     }
-    
+
     return instructions;
   }
 
@@ -338,7 +336,7 @@ export class ComplexDevContainerGenerator extends DevContainerGenerator {
 
     // Add Docker-in-Docker support
     config.runArgs = ['--cap-add=SYS_PTRACE', '--security-opt', 'seccomp=unconfined'];
-    
+
     // Add volume mounts for better performance
     config.mounts = [
       ...(config.mounts || []),

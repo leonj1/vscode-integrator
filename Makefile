@@ -2,8 +2,6 @@
 .DEFAULT_GOAL := help
 
 # Variables
-IMAGE_NAME := vscode-integrator-test
-DOCKER_RUN := docker run --rm -v $(PWD):/app -w /app
 
 .PHONY: help
 help: ## Show this help message
@@ -13,39 +11,29 @@ help: ## Show this help message
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: test
-test: ## Run tests in Docker container
-	@echo "Building test Docker image..."
-	@docker build -f Dockerfile.test -t $(IMAGE_NAME) .
+test: ## Run tests
 	@echo "Running tests..."
-	@$(DOCKER_RUN) $(IMAGE_NAME) npm test
+	@npm test
 
 .PHONY: test-coverage
-test-coverage: ## Run tests with coverage in Docker container
-	@echo "Building test Docker image..."
-	@docker build -f Dockerfile.test -t $(IMAGE_NAME) .
+test-coverage: ## Run tests with coverage
 	@echo "Running tests with coverage..."
-	@$(DOCKER_RUN) $(IMAGE_NAME) npm run test:coverage
+	@npm run test:coverage
 
 .PHONY: test-watch
-test-watch: ## Run tests in watch mode (interactive)
-	@echo "Building test Docker image..."
-	@docker build -f Dockerfile.test -t $(IMAGE_NAME) .
+test-watch: ## Run tests in watch mode
 	@echo "Running tests in watch mode..."
-	@docker run --rm -it -v $(PWD):/app -w /app $(IMAGE_NAME) npm run test:watch
+	@npm run test:watch
 
 .PHONY: lint
-lint: ## Run linting in Docker container
-	@echo "Building test Docker image..."
-	@docker build -f Dockerfile.test -t $(IMAGE_NAME) .
+lint: ## Run linting
 	@echo "Running linter..."
-	@$(DOCKER_RUN) $(IMAGE_NAME) npm run lint
+	@npm run lint
 
 .PHONY: typecheck
-typecheck: ## Run type checking in Docker container
-	@echo "Building test Docker image..."
-	@docker build -f Dockerfile.test -t $(IMAGE_NAME) .
+typecheck: ## Run type checking
 	@echo "Running type check..."
-	@$(DOCKER_RUN) $(IMAGE_NAME) npm run typecheck
+	@npm run typecheck
 
 .PHONY: build
 build: ## Build TypeScript to JavaScript
@@ -92,6 +80,5 @@ build-docker: ## Build binaries using Docker (for cross-platform builds)
 clean: ## Clean up generated files and Docker images
 	@echo "Cleaning up..."
 	@rm -rf dist coverage node_modules binaries
-	@docker rmi $(IMAGE_NAME) 2>/dev/null || true
 	@docker rmi vscode-integrator-builder 2>/dev/null || true
 	@echo "Clean complete"

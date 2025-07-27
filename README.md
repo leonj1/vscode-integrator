@@ -42,18 +42,14 @@ An automated tool that generates DevContainer and VS Code configurations for sof
 ## Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/vscode-integrator.git
-cd vscode-integrator
+# Download the latest release
+curl -L -o vscode-integrator-linux https://github.com/leonj1/vscode-integrator/releases/latest/download/vscode-integrator-linux
 
-# Install dependencies
-npm install
+# Make it executable
+chmod +x vscode-integrator-linux
 
-# Build the project
-npm run build
-
-# Link globally (optional)
-npm link
+# Move to a directory in your PATH (optional)
+sudo mv vscode-integrator-linux /usr/local/bin/
 ```
 
 ## Usage
@@ -63,7 +59,11 @@ npm link
 Generate DevContainer and VS Code configurations with validation:
 
 ```bash
-./binaries/vscode-integrator-linux generate --validate
+# If you moved the binary to your PATH
+vscode-integrator-linux generate --validate
+
+# Or if running from the current directory
+./vscode-integrator-linux generate --validate
 ```
 
 ### Optional force
@@ -71,7 +71,11 @@ Generate DevContainer and VS Code configurations with validation:
 Force overwrite existing configurations:
 
 ```bash
-./binaries/vscode-integrator-linux generate --validate --force
+# If you moved the binary to your PATH
+vscode-integrator-linux generate --validate --force
+
+# Or if running from the current directory
+./vscode-integrator-linux generate --validate --force
 ```
 
 ## Generated Files
